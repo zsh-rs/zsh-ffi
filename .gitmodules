@@ -1,3 +1,3 @@
 [submodule "zsh"]
-	path = zsh
+	path = include/zsh
 	url = git@github.com:zsh-users/zsh.git
