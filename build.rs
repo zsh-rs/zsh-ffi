@@ -1,7 +1,7 @@
 extern crate bindgen;
 
 use std::path::{PathBuf};
-use std::{env, fs, vec};
+use std::{env, fs};
 
 const ZSH_BUILD_DIR: &'static str = "zsh_build";
 
