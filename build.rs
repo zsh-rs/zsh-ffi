@@ -1,15 +1,18 @@
-extern crate bindgen;
 
+use bindgen;
 use std::path::{PathBuf};
 use std::{env, fs};
 
 const ZSH_BUILD_DIR: &'static str = "zsh_build";
+const ZSH_VERSION_ENV: &'static str = "ZSH_VERSION";
 
 fn main() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    let Locations { wrapper, includes } = zsh_prebuild(&root, &out_path);
+    let version = checkout_zsh_version(&root);
+
+    let Locations { wrapper, includes } = zsh_prebuild(&root, &out_path, version);
 
     println!("cargo:rerun-if-changed=include/zsh/.git/HEAD");
     println!("cargo:rerun-if-changed=.git/modules/zsh/HEAD");
@@ -49,10 +52,10 @@ impl Locations {
     }
 }
 
-fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf) -> Locations {
+fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf, version: String) -> Locations {
     let src_dir = root.join("include/zsh");
     let target_dir = get_target_dir(&out_path).expect("Failed to determine Cargo target directory");
-    let build_dir = target_dir.join(ZSH_BUILD_DIR);
+    let build_dir = target_dir.join(ZSH_BUILD_DIR).join(version);
 
     let wrapper = build_dir.join("wrapper.h");
 
@@ -91,8 +94,26 @@ fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf) -> Locations {
     Locations::from(&wrapper, src_dir, build_dir)
 }
 
+
+fn checkout_zsh_version(root: &PathBuf) -> String {
+    let version = env::var(ZSH_VERSION_ENV).unwrap_or("5.9".into());
+    let tag = format!("zsh-{}", version);
+    
+    commands::switch_tag(&root.join("include/zsh"), &tag);
+    tag
+}
+
 mod commands {
     use std::{path::PathBuf, process::Command};
+
+    pub(super) fn switch_tag(submod: &PathBuf, tag: &str) {
+        Command::new("git")
+            .arg("switch")
+            .arg("--detach")
+            .arg(tag)
+            .current_dir(&submod)
+            .run()
+    }
 
     /// Generate configure script if submodule doesn't include it
     pub(super) fn autoreconf(submod: &PathBuf) {
