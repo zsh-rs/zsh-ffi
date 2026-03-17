@@ -1,7 +1,9 @@
 extern crate bindgen;
 
-use std::path::PathBuf;
+use std::path::{PathBuf};
 use std::{env, fs, vec};
+
+const ZSH_BUILD_DIR: &'static str = "zsh_build";
 
 fn main() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -9,7 +11,6 @@ fn main() {
 
     let Locations { wrapper, includes } = zsh_prebuild(&root, &out_path);
 
-    println!("cargo:rerun-if-changed={wrapper}");
     println!("cargo:rerun-if-changed=include/zsh/.git/HEAD");
     println!("cargo:rerun-if-changed=.git/modules/zsh/HEAD");
 
@@ -48,9 +49,10 @@ impl Locations {
     }
 }
 
-fn zsh_prebuild(root: &PathBuf, out_dir: &PathBuf) -> Locations {
+fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf) -> Locations {
     let src_dir = root.join("include/zsh");
-    let build_dir = out_dir.join("zsh");
+    let target_dir = get_target_dir(&out_path).expect("Failed to determine Cargo target directory");
+    let build_dir = target_dir.join(ZSH_BUILD_DIR);
 
     let wrapper = build_dir.join("wrapper.h");
 
@@ -58,8 +60,6 @@ fn zsh_prebuild(root: &PathBuf, out_dir: &PathBuf) -> Locations {
         fs::create_dir_all(&build_dir).expect("Failed to create build directory");
     }
 
-    // --- Cache check ---
-    // Key on submodule HEAD so we only re-run when submodule is updated
     let sha = fs::read_to_string(root.join(".git/modules/zsh/HEAD"))
         .or_else(|_| fs::read_to_string(src_dir.join(".git/HEAD")))
         .unwrap_or_default();
@@ -144,4 +144,16 @@ mod commands {
             assert!(status.success(), "command failed: {:?}", self);
         }
     }
+}
+
+fn get_target_dir(out_dir: &PathBuf) -> Option<PathBuf> {
+    let profile = std::env::var("PROFILE").expect("PROFILE environment variable not set");
+    let mut sub_path = out_dir.as_path();
+    while let Some(parent) = sub_path.parent() {
+        if parent.ends_with(&profile) {
+            return parent.parent().map(|p| p.to_path_buf());
+        }
+        sub_path = parent;
+    }
+    None
 }
