@@ -1,35 +1,50 @@
-
 use bindgen;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::{env, fs};
 
 const ZSH_BUILD_DIR: &'static str = "zsh_build";
-const ZSH_VERSION_ENV: &'static str = "ZSH_VERSION";
 
 fn main() {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    let version = checkout_zsh_version(&root);
+    let submod = root.join("include/zsh");
+    let version = checkout_zsh_version(&submod);
 
-    let Locations { wrapper, includes } = zsh_prebuild(&root, &out_path, version);
+    let build_dir = get_target_dir(&out_path)
+        .expect("Failed to determine Cargo target directory")
+        .join(ZSH_BUILD_DIR)
+        .join(&version);
+
+    let Locations { wrapper, includes } = zsh_prebuild(&root, &submod, &build_dir);
 
     println!("cargo:rerun-if-changed=include/zsh/.git/HEAD");
     println!("cargo:rerun-if-changed=.git/modules/zsh/HEAD");
 
-    let bindings = bindgen::Builder::default()
+    bindgen::Builder::default()
         .header(wrapper)
         .clang_args(includes.iter().map(|p| format!("-I{}", p.display())))
         .clang_arg("-DMODULE")
+        .clang_arg("-fretain-comments-from-system-headers")
+        .allowlist_file(format!(r#"{}/Src/.*\.h"#, submod.display()))
+        .allowlist_file(format!(r#"{}/.*\.(h|mdh|epro)"#, build_dir.display()))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .derive_default(true)
         .wrap_unsafe_ops(true)
         .generate()
-        .expect("Unable to generate bindings");
-
-    bindings
+        .expect("Unable to generate bindings")
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
+}
+
+const ZSH_VERSION_ENV: &'static str = "ZSH_VERSION";
+
+fn checkout_zsh_version(submod: &PathBuf) -> String {
+    let version = env::var(ZSH_VERSION_ENV).unwrap_or("5.9".into());
+    let tag = format!("zsh-{}", version);
+
+    commands::switch_tag(&submod, &tag);
+    tag
 }
 
 struct Locations {
@@ -38,13 +53,11 @@ struct Locations {
 }
 
 impl Locations {
-    fn from(wrapper: &PathBuf, src_dir: PathBuf, build_dir: PathBuf) -> Self {
+    fn from(wrapper: &PathBuf, src_dir: &PathBuf, build_dir: &PathBuf) -> Self {
         Self {
             wrapper: wrapper.to_str().unwrap().to_owned(),
             includes: vec![
                 src_dir.join("Src"),
-                // src_dir.join("Src/Builtins"),
-                // src_dir.join("Src/Modules"),
                 src_dir.join("Src/Zle"),
                 build_dir.join("Src"),
             ],
@@ -52,11 +65,7 @@ impl Locations {
     }
 }
 
-fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf, version: String) -> Locations {
-    let src_dir = root.join("include/zsh");
-    let target_dir = get_target_dir(&out_path).expect("Failed to determine Cargo target directory");
-    let build_dir = target_dir.join(ZSH_BUILD_DIR).join(version);
-
+fn zsh_prebuild(root: &PathBuf, submod: &PathBuf, build_dir: &PathBuf) -> Locations {
     let wrapper = build_dir.join("wrapper.h");
 
     if !build_dir.exists() {
@@ -64,7 +73,7 @@ fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf, version: String) -> Location
     }
 
     let sha = fs::read_to_string(root.join(".git/modules/zsh/HEAD"))
-        .or_else(|_| fs::read_to_string(src_dir.join(".git/HEAD")))
+        .or_else(|_| fs::read_to_string(submod.join(".git/HEAD")))
         .unwrap_or_default();
     let stamp = build_dir.join("configure.stamp");
     let needs_configure = fs::read_to_string(&stamp)
@@ -72,8 +81,8 @@ fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf, version: String) -> Location
         .unwrap_or(true);
 
     if needs_configure {
-        commands::autoreconf(&src_dir);
-        commands::configure(&src_dir, &build_dir);
+        commands::autoreconf(&submod);
+        commands::configure(&submod, &build_dir);
         commands::make_prep(&build_dir);
         commands::make_headers(&build_dir);
 
@@ -91,16 +100,7 @@ fn zsh_prebuild(root: &PathBuf, out_path: &PathBuf, version: String) -> Location
         fs::write(&stamp, &sha).unwrap();
     }
 
-    Locations::from(&wrapper, src_dir, build_dir)
-}
-
-
-fn checkout_zsh_version(root: &PathBuf) -> String {
-    let version = env::var(ZSH_VERSION_ENV).unwrap_or("5.9".into());
-    let tag = format!("zsh-{}", version);
-    
-    commands::switch_tag(&root.join("include/zsh"), &tag);
-    tag
+    Locations::from(&wrapper, submod, build_dir)
 }
 
 mod commands {
@@ -111,6 +111,7 @@ mod commands {
             .arg("switch")
             .arg("--detach")
             .arg(tag)
+            // .env(key, val)
             .current_dir(&submod)
             .run()
     }
