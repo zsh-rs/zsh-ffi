@@ -18,9 +18,12 @@ This crate provides low-level FFI bindings to the ZSH API. It allows users to in
 
 ### Source
 
-- ➕ Use `git` submodules to vendor ZSH C headers
+- ✅ Use `git` submodules to vendor ZSH C headers
     - Where do we source the headers from, is there a mirror we can leverage?
-- ➕ Update .gitignore: config.h
+- ✅ Update .gitignore: config.h
+- 📋 Optionally support using development headers like `zsh-dev` [on Debian](https://packages.debian.org/trixie/zsh-dev)
 
 ### Build
-- ➕ Run `./configure` to target user's system correctly
+- ✅ Run `./configure` to target user's system correctly
+- 📋 Optimize run duration of `./configure`
+  - Checking in a `config.site` to avoid checks that aren't relevant to our use case
