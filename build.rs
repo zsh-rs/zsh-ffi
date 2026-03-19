@@ -26,8 +26,8 @@ fn main() {
         .clang_args(includes.iter().map(|p| format!("-I{}", p.display())))
         .clang_arg("-DMODULE")
         .clang_arg("-fretain-comments-from-system-headers")
-        .allowlist_file(format!(r#"{}/Src/.*\.h"#, submod.display()))
-        .allowlist_file(format!(r#"{}/.*\.(h|mdh|epro)"#, build_dir.display()))
+        .allowlist_file(format!(r#"{}/Src/.*?\.h"#, submod.display()))
+        .allowlist_file(format!(r#"{}/.*?\.(h|mdh|epro)"#, build_dir.display()))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .derive_default(true)
         .wrap_unsafe_ops(true)
@@ -82,7 +82,7 @@ fn zsh_prebuild(root: &PathBuf, submod: &PathBuf, build_dir: &PathBuf) -> Locati
 
     if needs_configure {
         commands::autoreconf(&submod);
-        commands::configure(&submod, &build_dir);
+        commands::configure(&root, &submod, &build_dir);
         commands::make_prep(&build_dir);
         commands::make_headers(&build_dir);
 
@@ -126,11 +126,10 @@ mod commands {
 
     // Run configure out-of-tree — produces config.h, Makefiles, signames.h, etc.
     // No --disable-dynamic: we need module subdirs to exist for proto generation
-    pub(super) fn configure(submod: &PathBuf, zsh_build: &PathBuf) {
-        println!("cargo:warning=Starting slow task...");
+    pub(super) fn configure(root: &PathBuf, submod: &PathBuf, zsh_build: &PathBuf) {
         Command::new(submod.join("configure").canonicalize().unwrap())
             .arg(format!("--srcdir={}", submod.display()))
-            .arg("--disable-dynamic")
+            .env("CONFIG_SITE", root.join("config/config.site").display().to_string())
             .current_dir(&zsh_build)
             .run()
     }
