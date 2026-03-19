@@ -3,7 +3,7 @@ name = "zsh-ffi"
 version = "0.2.0"
 edition = "2024"
 license = "MIT"
-description = "Low-level bindings to zsh internals"
+description = "Low-level bindings to dynamically-loadable zsh internals"
 readme="./README.md"
 
 [lib]
