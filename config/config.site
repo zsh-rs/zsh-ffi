@@ -370,7 +370,7 @@ case "$TARGET" in
     ac_cv_have_rlimit_tcache=no
     ;;
   *-apple-darwin)
-s    ac_cv_have_rlimit_as=yes
+    ac_cv_have_rlimit_as=yes
     ac_cv_have_rlimit_nofile=yes
     ac_cv_have_rlimit_rss=yes
     ac_cv_have_rlimit_memlock=yes
