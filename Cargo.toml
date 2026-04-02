@@ -2,12 +2,16 @@
 name = "zsh-ffi"
 version = "0.1.2"
 edition = "2024"
-description = "Low-level bindings to zsh internals"
 license = "MIT"
+description = "Low-level bindings to dynamically-loadable zsh internals"
+readme="./README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "zsh_ffi"
 
 [dependencies]
 
 [build-dependencies]
 bindgen = '0.72.1'
+glob = "0.3.3"
+zsh-src = { git = "https://github.com/zsh-rs/zsh-src.git", version = "0.1.0" }
