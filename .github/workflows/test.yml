@@ -1,0 +1,56 @@
+name: Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+        cargo_flags:
+          - "--no-default-features"
+          - "--all-features"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Install ZSH
+        if: runner.os == 'Linux'
+        run: sudo apt-get install zsh
+
+      - name: ⚡ Cache cargo registry
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cache/zsh-src
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: 🔨 Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all ${{ matrix.cargo_flags }}
+
+      - name: 🧪 Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all ${{ matrix.cargo_flags }}
