@@ -16,12 +16,12 @@ name = "zsh"
 [features]
 default = ["all"]
 all = ["zle", "modules", "builtins"]
-zle = ["paste"]
-modules = ["paste"]
-builtins = ["paste"]
+zle = ["pastey"]
+modules = ["pastey"]
+builtins = ["pastey"]
 
 [dependencies]
-paste = { version = "1.0.15", optional = true }
+pastey = { version = "0.2", optional = true }
 
 [build-dependencies]
 bindgen = '0.72.1'
