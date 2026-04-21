@@ -33,7 +33,14 @@ jobs:
 
       - name: Install curses
         if: runner.os == 'MacOS'
-        run: brew install ncurses
+        run: |
+          # Install the library using the Homebrew Formula
+          brew install ncurses 
+          
+          NCURSES_PATH=$(brew --prefix ncurses)
+          echo "CPPFLAGS=-I$NCURSES_PATH/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L$NCURSES_PATH/lib" >> $GITHUB_ENV
+          echo "PATH=$NCURSES_PATH/bin:$PATH" >> $GITHUB_ENV
 
       - name: ⚡ Cache cargo registry
         uses: actions/cache@v5
