@@ -20,21 +20,19 @@ jobs:
           - "--all-features"
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
           toolchain: stable
-          override: true
 
       - name: Install ZSH
         if: runner.os == 'Linux'
         run: sudo apt-get install zsh
 
       - name: ⚡ Cache cargo registry
-        uses: actions/cache@v2
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -44,13 +42,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: 🔨 Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --all ${{ matrix.cargo_flags }}
-
+        run: cargo build --all ${{ matrix.cargo_flags }}
+        
       - name: 🧪 Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.cargo_flags }}
+        run: cargo test --all ${{ matrix.cargo_flags }}
