@@ -13,7 +13,15 @@ Low-level bindings to dynamically-loadable zsh internals
 [lib]
 name = "zsh"
 
+[features]
+default = ["all"]
+all = ["zle", "modules", "builtins"]
+zle = ["pastey"]
+modules = ["pastey"]
+builtins = ["pastey"]
+
 [dependencies]
+pastey = { version = "0.2", optional = true }
 
 [build-dependencies]
 bindgen = '0.72.1'

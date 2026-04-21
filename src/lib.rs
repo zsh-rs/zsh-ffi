@@ -1,6 +1,15 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-#![allow(unnecessary_transmutes)]
+#[cfg(any(feature = "zle", feature = "builtins", feature = "modules"))]
+#[macro_use]
+mod hooks_import;
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+mod base;
+pub use base::*;
+
+#[cfg(feature = "builtins")]
+pub mod builtins;
+
+#[cfg(feature = "modules")]
+pub mod modules;
+
+#[cfg(feature = "zle")]
+pub mod zle;
