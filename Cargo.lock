@@ -756,7 +756,7 @@ dependencies = [
 [[package]]
 name = "zsh-src"
 version = "0.1.0"
-source = "git+https://github.com/zsh-rs/zsh-src.git#36ea0fc52f64609436d9b6ce9561134a2529a9cd"
+source = "git+https://github.com/zsh-rs/zsh-src.git#8f124065eb0b6f06f41ea90799e722b149e5a945"
 dependencies = [
  "directories",
  "file-guard",
