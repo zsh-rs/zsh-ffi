@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - { value: ubuntu-latest, display: ubuntu }
+          - { value: ubuntu-latest, display: linux }
           - { value: macOS-latest, display: macos }
         cargo_flags:
           - { value: "--no-default-features", display: no-default-features }
