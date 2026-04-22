@@ -319,9 +319,9 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "pastey"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b867cad97c0791bbd3aaa6472142568c6c9e8f71937e98379f584cfb0cf35bec"
+checksum = "c5a797f0e07bdf071d15742978fc3128ec6c22891c31a3a931513263904c982a"
 
 [[package]]
 name = "percent-encoding"
@@ -453,9 +453,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.38"
+version = "0.23.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69f9466fb2c14ea04357e91413efb882e2a6d4a406e625449bc0a5d360d53a21"
+checksum = "7c2c118cb077cca2822033836dfb1b975355dfb784b5e8da48f7b6c5db74e60e"
 dependencies = [
  "log",
  "once_cell",
@@ -756,7 +756,7 @@ dependencies = [
 [[package]]
 name = "zsh-src"
 version = "0.1.0"
-source = "git+https://github.com/zsh-rs/zsh-src.git#bc69049afec3ca907bcb686bb22d938be08564f5"
+source = "git+https://github.com/zsh-rs/zsh-src.git#cac7c4fe1ef7b4ea44e9cfbef7fddf282bbd360a"
 dependencies = [
  "directories",
  "file-guard",

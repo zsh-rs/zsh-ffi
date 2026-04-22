@@ -26,4 +26,4 @@ pastey = { version = "0.2", optional = true }
 [build-dependencies]
 bindgen = '0.72.1'
 glob = "0.3.3"
-zsh-src = { git = "https://github.com/zsh-rs/zsh-src.git", version = "0.1.0" }
+zsh-src = { git = "https://github.com/zsh-rs/zsh-src.git", version = "0.1" }
