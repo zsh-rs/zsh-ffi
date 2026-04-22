@@ -19,8 +19,7 @@ jobs:
           - "--no-default-features"
           - "--all-features"
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -31,29 +30,55 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get install zsh
 
-      - name: Install curses
-        if: runner.os == 'MacOS'
-        run: |
-          # Install the library using the Homebrew Formula
-          brew install ncurses 
+      # - name: Install curses
+      #   if: runner.os == 'MacOS'
+      #   run: |
+      #     # Install the library using the Homebrew Formula
+      #     brew install ncurses 
           
-          NCURSES_PATH=$(brew --prefix ncurses)
-          echo "CPPFLAGS=-I$NCURSES_PATH/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L$NCURSES_PATH/lib" >> $GITHUB_ENV
-          echo "PATH=$NCURSES_PATH/bin:$PATH" >> $GITHUB_ENV
-
+      #     NCURSES_PATH=$(brew --prefix ncurses)
+      #     echo "CPPFLAGS=-I$NCURSES_PATH/include" >> $GITHUB_ENV
+      #     echo "LDFLAGS=-L$NCURSES_PATH/lib" >> $GITHUB_ENV
+      #     echo "PATH=$NCURSES_PATH/bin:$PATH" >> $GITHUB_ENV
+          
       - name: ⚡ Cache cargo registry
-        uses: actions/cache@v5
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+          cache-directories: |
             ~/.cache/zsh-src
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ~/Library/Caches/dev.zsh-rs.zsh-src
+
+      # - name: ⚡ Cache cargo registry
+      #   uses: actions/cache@v5
+      #   with:
+      #     path: |
+      #       ~/.cargo/registry
+      #       ~/.cargo/git
+      #       ~/.cache/zsh-src
+      #       target
+      #     key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: 🔍 Debug env before build
+        if: runner.os == 'macOS'
+        run: |
+          echo "CPPFLAGS=$CPPFLAGS"
+          echo "LDFLAGS=$LDFLAGS"
+          ls -la $(brew --prefix ncurses)/lib/ | head
+          ls /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/libncurses* 2>/dev/null || echo "no SDK ncurses"
 
       - name: 🔨 Build
         run: cargo build --all ${{ matrix.cargo_flags }}
         
       - name: 🧪 Test
         run: cargo test --all ${{ matrix.cargo_flags }}
+
+      - name: 📋 Upload config.log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-log-${{ matrix.os }}
+          path: |
+            ~/Library/Caches/dev.zsh-rs.zsh-src/zsh-5.9/config.log
+            ~/.cache/zsh-src/zsh-5.9/config.log
+
+        
