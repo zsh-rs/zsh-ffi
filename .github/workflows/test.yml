@@ -2,8 +2,18 @@ name: test
 
 on:
   push:
+    paths-ignore:
+      - README.md
+      - release.toml
+      - CHANGELOG.md
+      - docs/**
     branches: [ "main" ]
   pull_request:
+    paths-ignore:
+      - README.md
+      - release.toml
+      - CHANGELOG.md
+      - docs/**
     branches: [ "main" ]
 
 jobs:
