@@ -8,16 +8,16 @@ on:
 
 jobs:
   test:
-    name: platform-${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os.display }} / ${{ matrix.cargo_flags.display }}
+    runs-on: ${{ matrix.os.value }}
     strategy:
       matrix:
         os:
-          - ubuntu-latest
-          - macOS-latest
+          - { value: ubuntu-latest, display: ubuntu }
+          - { value: macOS-latest, display: macos }
         cargo_flags:
-          - "--no-default-features"
-          - "--all-features"
+          - { value: "--no-default-features", display: no-default-features }
+          - { value: "--all-features", display: all-features }
     steps:
       - uses: actions/checkout@v6
 
@@ -37,35 +37,17 @@ jobs:
             ~/.cache/zsh-src
             ~/Library/Caches/dev.zsh-rs.zsh-src
 
-      # - name: ⚡ Cache cargo registry
-      #   uses: actions/cache@v5
-      #   with:
-      #     path: |
-      #       ~/.cargo/registry
-      #       ~/.cargo/git
-      #       ~/.cache/zsh-src
-      #       target
-      #     key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: 🔍 Debug env before build
-        if: runner.os == 'macOS'
-        run: |
-          echo "CPPFLAGS=$CPPFLAGS"
-          echo "LDFLAGS=$LDFLAGS"
-          ls -la $(brew --prefix ncurses)/lib/ | head
-          ls /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/libncurses* 2>/dev/null || echo "no SDK ncurses"
-
       - name: 🔨 Build
-        run: cargo build --all ${{ matrix.cargo_flags }}
+        run: cargo build --all ${{ matrix.cargo_flags.value }}
         
       - name: 🧪 Test
-        run: cargo test --all ${{ matrix.cargo_flags }}
+        run: cargo test --all ${{ matrix.cargo_flags.value }}
 
       - name: 📋 Upload config.log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: config-log-${{ matrix.os }}
+          name: config-log-${{ matrix.os.value }}
           path: |
             ~/Library/Caches/dev.zsh-rs.zsh-src/zsh-5.9/config.log
             ~/.cache/zsh-src/zsh-5.9/config.log
