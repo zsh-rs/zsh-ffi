@@ -1,15 +1,13 @@
-[![test](https://github.com/zsh-rs/zsh-ffi/actions/workflows/test.yml/badge.svg)](https://github.com/zsh-rs/zsh-ffi/actions/workflows/test.yml)
-
-# `zsh-ffi`
+# `zsh-sys` [![CI](https://github.com/zsh-rs/zsh-sys/actions/workflows/ci.yml/badge.svg)](https://github.com/zsh-rs/zsh-sys/actions/workflows/ci.yml)
 
 This crate provides low-level FFI bindings to the ZSH API. It allows users to interact with ZSH internals and create ZSH modules in Rust. This crate is intended for advanced users who want to have more control over their ZSH modules and are comfortable working with unsafe code.
 
 
 ## Quick Start
-Add `zsh-ffi` as your dependency in Cargo.toml
+Add `zsh-sys` as your dependency in Cargo.toml
 
 ```sh
-cargo add zsh-ffi
+cargo add zsh-sys
 ```
 
 ## Usage
