@@ -1,4 +1,4 @@
-[![CI](https://github.com/zsh-rs/zsh-sys/actions/workflows/CI.yml/badge.svg)](https://github.com/zsh-rs/zsh-sys/actions/workflows/CI.yml)
+[![CI](https://github.com/zsh-rs/zsh-sys/actions/workflows/ci.yml/badge.svg)](https://github.com/zsh-rs/zsh-sys/actions/workflows/ci.yml)
 
 # `zsh-sys`
 
