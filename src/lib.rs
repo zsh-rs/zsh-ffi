@@ -2,6 +2,7 @@
 #[macro_use]
 mod hooks_import;
 
+mod extensions;
 mod base;
 pub use base::*;
 
