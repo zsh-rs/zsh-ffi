@@ -1,3 +1,7 @@
+#![doc = include_str!("../README.md")]
+
+
+
 #[cfg(any(feature = "zle", feature = "builtins", feature = "modules"))]
 #[macro_use]
 mod hooks_import;
